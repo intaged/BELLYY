@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Belly Inflation Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* Reset any potential interference */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* Force gradient on body */
+        body {
+            background: var(--primary-turquoise) !important;
+            background: linear-gradient(to bottom, #40E0D0, #48D1CC) !important;
+            background-attachment: fixed !important;
+        }
+
+        /* Remove any overlays */
+        body::before,
+        body::after {
+            display: none !important;
+        }
+
+        /* Clear any background from container */
+        .container {
+            background: transparent !important;
+        }
+
+        :root {
+            --bg-start: #FFFFFF;
+            --bg-end: #F3F4F6;
+            --primary-turquoise: #40E0D0; /* Turquoise */
+            --primary-coral: #FF6B6B;     /* Coral */
+            --accent-light: rgba(255, 107, 107, 0.1); /* Light coral for hover effects */
+        }
+
+        /* Remove noise texture */
+        body::after {
+            display: none;
+        }
+
+        /* Ensure content stays above background */
+        .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header-section {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 0;
+            margin: 0;
+            text-align: center;
+        }
+
+        .header {
+            padding-top: 0.5rem;
+            width: 100%;
+            text-align: center;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .header h1 {
+            margin: 0;
+            padding: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-coral);
+            letter-spacing: -0.03em;
+            line-height: 1.2;
+            opacity: 0;
+        }
+
+        .header p {
+            margin: 0.4rem 0 0 0;
+            font-size: 1rem;
+            font-weight: 400;
+            color: rgba(255, 107, 107, 0.8);
+            letter-spacing: -0.01em;
+            opacity: 0;
+        }
+
+        /* Professional nav bar */
+        .nav-bar {
+            position: fixed;
+            right: 0.75rem;
+            top: 0.75rem;
+            background: var(--primary-turquoise);
+            padding: 0.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-bar a {
+            color: var(--primary-coral);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .nav-bar a:hover {
+            background: var(--accent-light);
+            color: var(--primary-coral);
+        }
+
+        .nav-bar a.twitter:hover {
+            --accent-color: #1DA1F2;
+            --accent-light: rgba(29, 161, 242, 0.1);
+            background: var(--accent-light);
+            color: var(--accent-color);
+        }
+
+        .nav-bar a.telegram:hover {
+            --accent-color: #0088cc;
+            --accent-light: rgba(0, 136, 204, 0.1);
+            background: var(--accent-light);
+            color: var(--accent-color);
+        }
+
+        .nav-bar i {
+            font-size: 1.1rem;
+            width: 1.1rem;
+            height: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-bar a:hover i {
+            transform: scale(1.1);
+        }
+
+        /* Optional: Add divider */
+        .nav-bar .divider {
+            width: 1px;
+            height: 1.2rem;
+            background: linear-gradient(
+                to bottom,
+                transparent,
+                rgba(0, 0, 0, 0.06),
+                transparent
+            );
+            margin: 0 0.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .nav-bar {
+                padding: 0.4rem;
+            }
+            
+            .nav-bar a {
+                padding: 0.4rem 0.6rem;
+            }
+        }
+
+        /* Refined game canvas area */
+        .game-section {
+            background: white;
+            border-radius: 24px;
+            box-shadow: var(--shadow-md);
+            padding: 2rem;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 900px;
+            aspect-ratio: 4/3;
+            position: relative;
+            overflow: hidden;
+            margin-top: -1rem;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Subtle animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .header h1 {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .nav-bar {
+                right: 0.5rem;
+                top: 0.5rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header p {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Refined animations */
+        .nav-bar a {
+            transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+        }
+
+        .nav-bar a:hover {
+            transform: translateY(-1px);
+        }
+
+        /* Optional: Add subtle gradient to buttons on hover */
+        .nav-bar a:hover::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                to bottom right,
+                var(--accent-light),
+                transparent
+            );
+            border-radius: inherit;
+            z-index: -1;
+        }
+
+        /* Remove emoji from title */
+        .header h1::after {
+            content: none;
+        }
+
+        /* Optional: Add subtle transition for page load */
+        .header {
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Make sure Font Awesome is properly loaded */
+        .fa-x-twitter, .fa-telegram {
+            display: inline-block !important;
+        }
+
+        /* Remove floating emojis */
+        .floating-emoji {
+            display: none;  /* Hide all floating emojis */
+        }
+
+        /* Clean up any remaining emoji elements */
+        .emoji-1, .emoji-2, .emoji-3, .emoji-4 {
+            display: none;
+        }
+
+        /* If they're background images, remove them */
+        body::before,
+        body::after {
+            display: none;
+        }
+
+        .ticker-wrap {
+            position: fixed;
+            left: 0.75rem;
+            top: 0.75rem;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0.5rem 0.8rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            overflow: hidden;
+            backdrop-filter: blur(8px);
+        }
+
+        .ticker {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--primary-coral);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .ticker::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: var(--primary-coral);
+            border-radius: 50%;
+            margin-right: 0.3rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .ticker-wrap {
+                left: 0.5rem;
+                top: 0.5rem;
+                padding: 0.4rem 0.6rem;
+            }
+            
+            .ticker {
+                font-size: 0.85rem;
+            }
+        }
+
+        .footer {
+            position: fixed;
+            left: 1rem;
+            bottom: 1rem;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .footer span {
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--primary-coral);
+            text-decoration: none;
+            transition: color 0.2s ease;
+            opacity: 0.8;
+        }
+
+        .footer span:hover {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .footer {
+                left: 0.75rem;
+                bottom: 0.75rem;
+            }
+            
+            .footer span {
+                font-size: 12px;
+            }
+        }
+
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-turquoise);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .loading-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .loading-bar {
+            width: 160px;
+            height: 2px;
+            background: rgba(255, 215, 0, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .loading-progress {
+            width: 100%;
+            height: 100%;
+            background: var(--primary-coral);
+            transform-origin: left;
+            animation: fill 0.8s ease-out forwards;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fill {
+            0% { transform: scaleX(0); }
+            100% { transform: scaleX(1); }
+        }
+
+        .loading-screen-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Add these styles to prevent text selection */
+        canvas, 
+        .canvas-wrapper,
+        .container {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        .footer span {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        /* Custom cursor styles */
+        .cursor-ripple {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary-coral);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.2s, height 0.2s, opacity 0.2s;
+            opacity: 0;
+        }
+
+        .cursor-click {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            background: var(--primary-coral);
+            border-radius: 50%;
+            opacity: 0;
+        }
+
+        /* Remove cursor: none from canvas */
+        canvas {
+            cursor: default;
+        }
+
+        /* Add hover class for belly area */
+        canvas.belly-hover {
+            cursor: none;
+        }
+
+        .progress-container {
+            position: absolute;
+            left: 180px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 300px;
+            background: rgba(255, 215, 0, 0.2);
+            border-radius: 10px;
+            overflow: visible;
+        }
+
+        .progress-percentage {
+            display: block !important;
+            position: absolute;
+            top: -45px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary-coral);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 9999;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(to top, var(--primary-coral), #FF8C8C, #FFACAC);
+            transition: height 0.1s ease;
+        }
+
+        .progress-bar.pulse {
+            animation: pulse 0.5s ease;
+        }
+
+        .milestone {
+            position: absolute;
+            right: -30px;
+            transform: translateY(50%);
+            font-size: 16px;
+            filter: grayscale(1);
+            transition: filter 0.3s ease;
+            z-index: 5;
+        }
+
+        @keyframes pulse {
+            0% { transform: scaleX(1); }
+            50% { transform: scaleX(1.1); }
+            100% { transform: scaleX(1); }
+        }
+
+        /* Add glow effect when milestone is reached */
+        .milestone.reached {
+            filter: grayscale(0);
+            animation: pop 0.3s ease;
+        }
+
+        @keyframes pop {
+            0% { transform: translateY(50%) scale(1); }
+            50% { transform: translateY(50%) scale(1.2); }
+            100% { transform: translateY(50%) scale(1); }
+        }
+
+        /* Add container glow effect */
+        .progress-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.2);
+            border-radius: 10px;
+            pointer-events: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: var(--primary-turquoise);
+            padding: 30px 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease;
+            color: var(--primary-coral);
+        }
+
+        .modal.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .modal.show .modal-content {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .modal h2 {
+            margin: 0 0 15px 0;
+            font-size: 28px;
+            color: #1F2937;
+        }
+
+        .modal p {
+            margin: 0 0 25px 0;
+            font-size: 18px;
+            color: #4B5563;
+        }
+
+        #restartButton {
+            background: var(--primary-coral);
+            color: var(--primary-turquoise);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        #restartButton:hover {
+            background: #FF8C8C;
+            transform: scale(1.05);
+        }
+
+        .death-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(64, 224, 208, 0.95);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .death-screen.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .death-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: var(--primary-coral);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .death-content h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .death-content h2 {
+            font-size: 24px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .restart-btn {
+            background: transparent;
+            color: var(--primary-coral);
+            border: 2px solid var(--primary-coral);
+            padding: 12px 30px;
+            font-size: 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 20px;
+        }
+
+        .restart-btn:hover {
+            background: var(--primary-coral);
+            color: var(--primary-turquoise);
+            transform: scale(1.05);
+        }
+
+        .social-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .social-btn {
+            color: var(--primary-coral);
+            text-decoration: none;
+            font-size: 24px;
+            padding: 12px;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .social-btn:hover {
+            background: rgba(255, 107, 107, 0.1);
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -40%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+
+        .top-text {
+            position: fixed;
+            top: 1.25rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            text-align: center;
+        }
+
+        .top-text h1 {
+            font-weight: 800;
+            font-size: 28px;
+            margin: 0;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        .top-text p {
+            font-weight: 500;
+            font-size: 16px;
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .disclaimer-link {
+            color: #9CA3AF;
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 13px;
+        }
+
+        .disclaimer-link:hover {
+            color: #6B7280;
+        }
+
+        /* Modal styles */
+        #disclaimerModal .modal-content {
+            max-width: 500px;
+            padding: 25px;
+        }
+
+        #disclaimerModal h3 {
+            margin: 0 0 15px 0;
+            color: var(--primary-coral);
+            font-size: 20px;
+        }
+
+        #disclaimerModal p {
+            color: rgba(255, 107, 107, 0.8);
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            background: var(--primary-coral);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .close-btn:hover {
+            background: #FF8C8C;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-text">
+        <h1>Belly's Gonna Burst! 💥</h1>
+        <p>The $BELLY Never Lies.</p>
+    </div>
+
+    <div id="loading-screen">
+        <div class="loading-content">
+            <img src="orangie.png" class="loading-image" alt="Loading...">
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="texture"></div>
+    <div class="spotlight"></div>
+    <div class="floating-emoji emoji-1">🎈</div>
+    <div class="floating-emoji emoji-2">✨</div>
+    <div class="floating-emoji emoji-3">💫</div>
+    <div class="floating-emoji emoji-4">🎈</div>
+
+    <div class="ticker-wrap">
+        <div class="ticker">
+            $BELLY
+        </div>
+    </div>
+
+    <div class="header">
+        <h1>Belly's Gonna Burst! 💥</h1>
+        <p>The $BELLY Never Lies.</p>
+    </div>
+
+    <div class="container">
+        <div class="ambient-glow glow-1"></div>
+        <div class="ambient-glow glow-2"></div>
+        <div class="canvas-wrapper">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+        </div>
+        <div class="progress-container">
+            <span class="progress-percentage">0%</span>
+            <div class="progress-bar"></div>
+        </div>
+        <div class="footer">
+            <span>This is just a meme, don't take it seriously. 🚀</span>
+            <span class="disclaimer-link">Disclaimer</span>
+        </div>
+    </div>
+    <script src="game.js"></script>
+
+    <!-- Social links -->
+    <nav class="nav-bar">
+        <a href="https://x.com/ORANGIEBELLYSOL" target="_blank" rel="noopener noreferrer" class="twitter">
+            <i class="fab fa-x-twitter"></i>
+        </a>
+        <a href="https://t.me/orangiebellyonsol" target="_blank" rel="noopener noreferrer" class="telegram">
+            <i class="fab fa-telegram"></i>
+        </a>
+    </nav>
+
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const loadingScreen = document.getElementById('loading-screen');
+                loadingScreen.classList.add('loading-screen-hidden');
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 300);
+            }, 800); // Total loading time reduced to 0.8 seconds
+        });
+    </script>
+
+    <div class="cursor-ripple"></div>
+    <div class="cursor-click"></div>
+
+    <script>
+        const ripple = document.querySelector('.cursor-ripple');
+        const clickDot = document.querySelector('.cursor-click');
+        const canvas = document.getElementById('gameCanvas');
+        
+        function isOverBelly(e) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            const bodyOffset = character.bellySize * 0.4;
+            const dx = mouseX - character.x;
+            const dy = mouseY - (character.y + 50 - bodyOffset);
+            return (dx * dx + dy * dy) <= (character.bellySize * character.bellySize);
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (isOverBelly(e)) {
+                ripple.style.left = e.clientX + 'px';
+                ripple.style.top = e.clientY + 'px';
+                clickDot.style.left = e.clientX + 'px';
+                clickDot.style.top = e.clientY + 'px';
+                ripple.style.opacity = '1';
+                ripple.style.width = '30px';
+                ripple.style.height = '30px';
+                clickDot.style.opacity = '1';
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            ripple.style.opacity = '0';
+            ripple.style.width = '20px';
+            ripple.style.height = '20px';
+            clickDot.style.opacity = '0';
+        });
+
+        // Hide effects when mouse leaves canvas
+        canvas.addEventListener('mouseleave', () => {
+            ripple.style.opacity = '0';
+            clickDot.style.opacity = '0';
+        });
+    </script>
+
+    <div id="deathScreen" class="death-screen">
+        <div class="death-content">
+            <h1>Bro, why would you do that to Orangie? 🫠</h1>
+            <h2>Was the Solana worth it? 🫤</h2>
+            <button class="restart-btn" id="deathScreenRestartButton">Play Again</button>
+            <div class="social-buttons">
+                <a href="https://x.com/ORANGIEBELLYSOL" class="social-btn" target="_blank">
+                    <i class="fa-brands fa-x-twitter"></i>
+                </a>
+                <a href="https://t.me/orangiebellyonsol" class="social-btn" target="_blank">
+                    <i class="fa-brands fa-telegram"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add the disclaimer modal -->
+    <div id="disclaimerModal" class="modal">
+        <div class="modal-content">
+            <h3>Disclaimer</h3>
+            <p>All images on this website are used for entertainment and parody purposes only. The likeness or resemblance to any real person is purely coincidental and not intended to imply endorsement or affiliation. If you are the person depicted and have concerns, please contact us for resolution.</p>
+            <button class="close-btn">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // Add modal functionality
+        const disclaimerLink = document.querySelector('.disclaimer-link');
+        const disclaimerModal = document.getElementById('disclaimerModal');
+        const closeBtn = document.querySelector('.close-btn');
+
+        disclaimerLink.addEventListener('click', () => {
+            disclaimerModal.classList.add('show');
+        });
+
+        closeBtn.addEventListener('click', () => {
+            disclaimerModal.classList.remove('show');
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === disclaimerModal) {
+                disclaimerModal.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>
